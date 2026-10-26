@@ -1,4 +1,4 @@
-# Reminder Automation — Alertas Cobli → SIGMA
+# Alert Automation — Alertas Cobli → SIGMA
 
 Automação em [n8n](https://n8n.io) que leva os alertas de telemetria veicular da **Cobli** para a central de monitoramento **SIGMA (Segware)** quase em tempo real. Assim, eventos como a saída de um veículo de um bolsão (geofence) chegam ao operador da central sem trabalho manual.
 
