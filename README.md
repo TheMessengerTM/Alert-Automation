@@ -12,6 +12,8 @@ A plataforma de rastreamento (Cobli) gera os alertas, mas a equipe de monitorame
 
 ## Como funciona
 
+![Fluxo no editor do n8n](docs/fluxo-n8n.png)
+
 ```mermaid
 flowchart LR
     A[⏱️ Agendamento<br/>a cada 10 s] --> B[Cobli API<br/>eventos dos últimos 10 min]
