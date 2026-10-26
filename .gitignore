@@ -1,0 +1,10 @@
+# Exports originais do n8n (contêm IDs, credenciais e dados reais) — NUNCA versionar
+exportados/
+
+# Arquivos de credenciais/ambiente
+*.env
+.env*
+credentials*.json
+*credenciais*
+
+__pycache__/

@@ -1,0 +1,449 @@
+{
+  "name": "Automação de Alertas",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        -400
+      ],
+      "id": "e50d098a-0c3e-4db9-abae-4cc3c4a6eb0d",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://api.cobli.co/v1/triggers/events",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "startTime",
+              "value": "={{ $now.minus({ minutes: 10 }).toUTC().toISO() }}"
+            },
+            {
+              "name": "endTime",
+              "value": "={{ $now.toUTC().toISO() }}"
+            },
+            {
+              "name": "ruleId",
+              "value": "<<PREENCHER>>"
+            },
+            {
+              "name": "triggerIds",
+              "value": "<<PREENCHER>>"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "cobli-api-key",
+              "value": "<<PREENCHER>>"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        224,
+        -400
+      ],
+      "id": "b552bc55-522f-4215-9fe8-596be8c5173a",
+      "name": "Buscar Eventos Cobli"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "ja_processado",
+        "key": "={{ 'cobli:sigma:event:' + $json.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        672,
+        -400
+      ],
+      "id": "a0692fe7-2827-4370-83da-936df2dc19d6",
+      "name": "Redis",
+      "credentials": {
+        "redis": {
+          "name": "<<CRIAR CREDENCIAL redis>>"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bf3b7210-16f1-41bd-affc-9b5581958048",
+              "leftValue": "={{ $json.ja_processado }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        -400
+      ],
+      "id": "7bb12deb-8886-40d9-b4a5-6d95cac11acf",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "content",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -400
+      ],
+      "id": "b4d6054c-9a7c-4fee-8c33-974de4ea1040",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b61da404-0ac8-44a1-b93c-cbd5a6b82f31",
+              "name": "cobli_event_id",
+              "value": "={{ $('Split Out').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "32172132-ead9-4a09-97ad-144ffd91edd7",
+              "name": "original_event_id",
+              "value": "={{ $('Split Out').item.json.meta.original_event_id }}",
+              "type": "string"
+            },
+            {
+              "id": "82b00733-367b-43da-8cef-7ac1fab82474",
+              "name": "event_time",
+              "value": "={{ $('Split Out').item.json.event_time }}",
+              "type": "string"
+            },
+            {
+              "id": "935354cd-a659-41cb-9f09-53aaa95f3dad",
+              "name": "placa",
+              "value": "={{ $('Split Out').item.json.meta.vehicle.license_plate }}",
+              "type": "string"
+            },
+            {
+              "id": "bd11bdaf-eb5a-41ef-92ab-363249793575",
+              "name": "alerta",
+              "value": "={{ $('Split Out').item.json.trigger.name }}",
+              "type": "string"
+            },
+            {
+              "id": "9c072eac-74ef-48c0-b805-87c97a5cda2c",
+              "name": "tipo",
+              "value": "={{ $('Split Out').item.json.meta.condition_category }}",
+              "type": "string"
+            },
+            {
+              "id": "3096e872-2d4e-46aa-a3c5-f7f0eefc8621",
+              "name": "condicao",
+              "value": "={{ $('Split Out').item.json.meta.condition_name }}",
+              "type": "string"
+            },
+            {
+              "id": "07040106-e320-4936-ad24-85dc27794312",
+              "name": "local",
+              "value": "={{ $('Split Out').item.json.meta.geofence.name }}",
+              "type": "string"
+            },
+            {
+              "id": "9ea63e5d-08e1-43cb-872b-f3f7b578a840",
+              "name": "endereco",
+              "value": "={{ $('Split Out').item.json.meta.address }}",
+              "type": "string"
+            },
+            {
+              "id": "c0a2a9b3-7847-4201-bb57-74f111e45d42",
+              "name": "device_id",
+              "value": "={{ $('Split Out').item.json.device_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1120,
+        -496
+      ],
+      "id": "526f59b4-3ba3-4e3b-bc6f-4949eacb1520",
+      "name": "Preparar Evento Cobli"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $json;\n\nconst date = new Date(data.event_time);\n\nconst dateTime = date\n  .toISOString()\n  .slice(0, 19)\n  .replace('T', ' ');\n\nreturn {\n  json: {\n    ...data,\n    sigma_payload: {\n      events: [\n        {\n          eventId: `COBLI-${data.device_id}-${data.original_event_id}`,\n          code: \"F241\",\n          trackerId: data.device_id,\n          dateTime: dateTime,\n          complement: `Saída do bolsão ${data.local} - ${data.endereco}`\n        }\n      ]\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        -496
+      ],
+      "id": "1e726b7c-1e1a-4341-a362-4c839ce4aab5",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.segware.com.br/v1/events/tracking",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.sigma_payload }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1568,
+        -496
+      ],
+      "id": "70fb2d8e-b6de-4e4d-8500-43fcbab45902",
+      "name": "Enviar Evento SIGMA",
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "<<CRIAR CREDENCIAL httpHeaderAuth>>"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "58245444-ba50-42aa-b8e7-8ffde8b17855",
+              "leftValue": "={{ $json.statusCode }}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1792,
+        -496
+      ],
+      "id": "e7db4209-8734-4da4-924c-d49377978985",
+      "name": "SIGMA recebeu?"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "={{ 'cobli:sigma:event:' + $('Preparar Evento Cobli').item.json.cobli_event_id }}",
+        "value": "processado",
+        "expire": true,
+        "ttl": 86400
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        2016,
+        -592
+      ],
+      "id": "fcca8415-58c2-4570-b611-ddd8da6cdd51",
+      "name": "Marcar Evento Processado",
+      "credentials": {
+        "redis": {
+          "name": "<<CRIAR CREDENCIAL redis>>"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        -304
+      ],
+      "id": "51ba021f-b291-4426-9bfb-8b7ef024efba",
+      "name": "No Operation, do nothing"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Buscar Eventos Cobli",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Eventos Cobli": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Preparar Evento Cobli",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Evento Cobli": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Enviar Evento SIGMA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Evento SIGMA": {
+      "main": [
+        [
+          {
+            "node": "SIGMA recebeu?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SIGMA recebeu?": {
+      "main": [
+        [
+          {
+            "node": "Marcar Evento Processado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}
