@@ -3,8 +3,11 @@
 Automação em [n8n](https://n8n.io) que leva os alertas de telemetria veicular da **Cobli** para a central de monitoramento **SIGMA (Segware)** quase em tempo real. Assim, eventos como a saída de um veículo de um bolsão (geofence) chegam ao operador da central sem trabalho manual.
 
 ![n8n](https://img.shields.io/badge/n8n-workflow-EA4B71?logo=n8n&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-nós_Code-F7DF1E?logo=javascript&logoColor=black)
 ![Redis](https://img.shields.io/badge/Redis-deduplicação-DC382D?logo=redis&logoColor=white)
 ![REST](https://img.shields.io/badge/API-REST-0A66C2)
+![Cobli](https://img.shields.io/badge/Cobli-telemetria-555555)
+![SIGMA](https://img.shields.io/badge/SIGMA-Segware-555555)
 
 ## O problema
 
