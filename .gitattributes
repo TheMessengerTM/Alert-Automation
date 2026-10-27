@@ -1,0 +1,2 @@
+# Os fluxos n8n são JSON; por padrão o GitHub não conta JSON na linguagem do repositório
+*.json linguist-detectable=true
